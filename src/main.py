@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import subprocess
 from os.path import exists as file_exists
 
 import requests
@@ -36,11 +37,26 @@ def opac_nlai():
 def write_range_to_json(range_start, range_end, base_url):
     results = Parallel(n_jobs=8)(delayed(scrape)(f"{base_url}{k}") for k in range(range_start, range_end))
     results_as_dict = {}
-    with open(f"./data/{range_start}-{range_end}.json", 'w', encoding='utf-8') as outfile:
+    with open(f"./src/data/{range_start}-{range_end}.json", 'w', encoding='utf-8') as outfile:
         for j in range(len(results)):
             results_as_dict[str(j + range_start)] = results[j]
         json.dump(results_as_dict, outfile, indent=4, ensure_ascii=False)
         outfile.close()
+    push_to_github()
+
+
+def push_to_github():
+    cmd = "git add ."
+    subprocess.call(cmd, shell=True)
+
+    cmd = 'git commit -m "Add files"'
+    subprocess.call(cmd, shell=True)
+
+    cmd = "git remote set-url origin git@github.com:HrBDev/nlai_crawler.git"
+    subprocess.call(cmd, shell=True)
+
+    cmd = "git push"
+    subprocess.call(cmd, shell=True)
 
 
 def scrape(url):
