@@ -3,3 +3,4 @@
 *.iml
 **/__pycache__
 /ssh-key
+.gitconfig
