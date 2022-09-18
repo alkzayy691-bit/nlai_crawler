@@ -34,7 +34,7 @@ def opac_nlai():
 
 
 def write_range_to_json(range_start, range_end, base_url):
-    results = Parallel(n_jobs=8)(delayed(scrape)(f"{base_url}{k}") for k in range(range_start, range_end))
+    results = Parallel(n_jobs=24)(delayed(scrape)(f"{base_url}{k}") for k in range(range_start, range_end))
     results_as_dict = {}
     with open(f"./data/{range_start}-{range_end}.json", 'w', encoding='utf-8') as outfile:
         for j in range(len(results)):
@@ -49,11 +49,13 @@ def scrape(url):
     soup = BeautifulSoup(response.content, features="lxml")
     form = soup.find("form",
                      attrs={"name": "search_BrowseSearchHitsForm"})
+    if not form:
+        return {}
     formcontent = form.find('td', attrs={"class": "formcontent"})
     td = formcontent.find('td', attrs={"width": "100%"})
     rows = td.find_all('tr')
     item = {}
-    translatable = str.maketrans('', '', '\u200c\u200f\u202a\u202b\u202c\u202d\u202e')
+    translatable = str.maketrans('', '', '\u200e\u200c\u200f\u202a\u202b\u202c\u202d\u202e')
     for row in rows:
         row_list = row.find_all('td')
         key = row_list[0].text.translate(translatable)
